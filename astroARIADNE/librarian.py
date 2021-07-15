@@ -310,38 +310,50 @@ class Librarian:
                 self._get_2mass_glimpse(cats, False, 'GLIMPSE')
                 continue
             elif c == 'GALEX':
-                current_cat = self._gaia_galex_xmatch(cats, self.ra, self.dec,
-                                                      self.radius)
-                if len(current_cat) == 0:
-                    CatalogWarning(c, 5).warn()
+                try:
+                    current_cat = self._gaia_galex_xmatch(cats, self.ra, self.dec,
+                                                          self.radius)
+                    if len(current_cat) == 0:
+                        CatalogWarning(c, 5).warn()
+                        continue
+                    self._retrieve_from_galex(current_cat, c)
                     continue
-                self._retrieve_from_galex(current_cat, c)
-                continue
+                except:
+                    continue
             elif c == 'MERMILLIOD':
-                current_cat = self._gaia_mermilliod_xmatch(cats, self.ra,
-                                                           self.dec,
-                                                           self.radius)
-                if len(current_cat) == 0:
-                    CatalogWarning(c, 5).warn()
+                try:
+                    current_cat = self._gaia_mermilliod_xmatch(cats, self.ra,
+                                                               self.dec,
+                                                               self.radius)
+                    if len(current_cat) == 0:
+                        CatalogWarning(c, 5).warn()
+                        continue
+                    self._retrieve_from_mermilliod(current_cat)
                     continue
-                self._retrieve_from_mermilliod(current_cat)
-                continue
+                except:
+                    continue
             elif c == 'STROMGREN_PAUNZ':
-                current_cat = self._gaia_paunzen_xmatch(cats, self.ra, self.dec,
-                                                        self.radius)
-                if len(current_cat) == 0:
-                    CatalogWarning(c, 5).warn()
+                try:
+                    current_cat = self._gaia_paunzen_xmatch(cats, self.ra, self.dec,
+                                                            self.radius)
+                    if len(current_cat) == 0:
+                        CatalogWarning(c, 5).warn()
+                        continue
+                    self._retrieve_from_stromgren(current_cat, 'STROMGREN_PAUNZEN')
                     continue
-                self._retrieve_from_stromgren(current_cat, 'STROMGREN_PAUNZEN')
-                continue
+                except:
+                    continue
             elif c == 'STROMGREN_HAUCK':
-                current_cat = self._gaia_hauck_xmatch(cats, self.ra, self.dec,
-                                                      self.radius)
-                if len(current_cat) == 0:
-                    CatalogWarning(c, 5).warn()
+                try:
+                    current_cat = self._gaia_hauck_xmatch(cats, self.ra, self.dec,
+                                                          self.radius)
+                    if len(current_cat) == 0:
+                        CatalogWarning(c, 5).warn()
+                        continue
+                    self._retrieve_from_stromgren(current_cat, 'STROMGREN_HAUCK')
                     continue
-                self._retrieve_from_stromgren(current_cat, 'STROMGREN_HAUCK')
-                continue
+                except:
+                    continue
         pass
 
     def _retrieve_from_tess(self):
@@ -689,15 +701,15 @@ class Librarian:
         res = j.get_results()
         return res['source_id'][0]
 
-    @staticmethod
-    def get_catalogs(ra, dec, radius):
+    # @staticmethod
+    def get_catalogs(self, ra, dec, radius):
         """Retrieve available catalogs for a star from Vizier."""
+        # v = Vizier(timeout=500)
         cats = Vizier.query_region(
             SkyCoord(
                 ra=ra, dec=dec, unit=(u.deg, u.deg), frame='icrs'
-            ), radius=radius
+            ), radius=3*u.arcsec, catalog=list(self.catalogs.keys())
         )
-
         return cats
 
     @staticmethod
